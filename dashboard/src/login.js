@@ -15,21 +15,24 @@ export function Login() {
       <h1>Login</h1>
       <hr />
       <Formik
-        initialValues={{ email: "", password: "" }}
+        initialValues={{ email: "", password: "", submission_error: "" }}
         onSubmit={async (values, actions) => {
           try {
-            console.log(process.env);
-            const { data } = await axios.post(process.env.REACT_APP_AUTH_URL, {
+            const LOGIN_URL = process.env.REACT_APP_AUTH_URL + "/authenticate";
+
+            const loginResponse = await axios.post(LOGIN_URL, {
               email: values.email,
               password: values.password,
             });
 
-            login({ user: data.user, token: data.token });
-            history.push("/");
+            if (loginResponse.data.success === true) {
+              login({ user: values.email, token: loginResponse.data.token });
+            }
+
+            return history.push("/");
           } catch (error) {
             actions.setErrors({
-              email: error.message,
-              password: error.message,
+              submission_error: "Invalid username or password",
             });
           }
         }}
@@ -97,6 +100,12 @@ export function Login() {
               {errors.password && touched.password && (
                 <div className="input-feedback">{errors.password}</div>
               )}
+
+              <input id="submission_error" type="hidden" />
+              {errors.submission_error && (
+                <div className="input-feedback">{errors.submission_error}</div>
+              )}
+
               <button type="submit" disabled={isSubmitting}>
                 Login
               </button>

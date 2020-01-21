@@ -1,7 +1,7 @@
 # build environment
 FROM node:13-alpine as build
 WORKDIR /app
-ARG REACT_APP_AUTH_URL=/api/auth
+ARG REACT_APP_AUTH_URL=/auth
 ENV REACT_APP_AUTH_URL=$REACT_APP_AUTH_URL
 ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json /app/package.json

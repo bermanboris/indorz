@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { Link, useHistory } from "react-router-dom";
+import axios from "axios";
 import { AuthContext } from "./auth";
 
 export function Register() {
@@ -13,10 +14,36 @@ export function Register() {
       <h1>Create An Account</h1>
       <hr />
       <Formik
-        initialValues={{ email: "", password: "" }}
-        onSubmit={async values => {
-          login({ user: values.email, token: values.password });
-          return history.push("/");
+        initialValues={{ email: "", password: "", submission_error: "" }}
+        onSubmit={async (values, actions) => {
+          const REGISTER_URL = process.env.REACT_APP_AUTH_URL + "/users";
+
+          try {
+            const register = await axios.post(REGISTER_URL, {
+              email: values.email,
+              password: values.password,
+            });
+
+            const LOGIN_URL = process.env.REACT_APP_AUTH_URL + "/authenticate";
+            const loginResponse = await axios.post(LOGIN_URL, {
+              email: values.email,
+              password: values.password,
+            });
+
+            if (loginResponse.data.success === true) {
+              login({
+                user: register.data.email,
+                token: loginResponse.data.token,
+              });
+              return history.push("/");
+            } else {
+              throw new Error(loginResponse.data.message);
+            }
+          } catch (error) {
+            actions.setErrors({
+              submission_error: "Registration failed, try again.",
+            });
+          }
         }}
         validationSchema={Yup.object().shape({
           email: Yup.string()
@@ -82,6 +109,9 @@ export function Register() {
               {errors.password && touched.password && (
                 <div className="input-feedback">{errors.password}</div>
               )}
+
+              <input id="submission_error" type="hidden" />
+
               <button type="submit" disabled={isSubmitting}>
                 Register
               </button>
