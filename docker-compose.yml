@@ -1,0 +1,29 @@
+version: "2.3"
+services:
+  load-balancer:
+    image: "nginx:stable-alpine"
+    ports:
+      - "3000:80"
+    volumes:
+      - ./etc/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  auth:
+    build:
+      context: ./auth
+    scale: 1
+    restart: always
+  giftcard:
+    build:
+      context: ./gift-card
+    scale: 2
+    restart: always
+  greeting:
+    build:
+      context: ./greeting
+    scale: 2
+    restart: always
+  # redis:
+  #   image: "redis:alpine"
+  # mongo:
+  #   image: mongo
+  #   ports:
+  #     - "27017:27017"
