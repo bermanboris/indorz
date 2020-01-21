@@ -1,31 +1,56 @@
-import React from "react";
+import React, { useContext } from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "./App.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
 import { Register } from "./register";
 import { Login } from "./login";
-import { Auth } from "./auth";
+import { AuthProvider, AuthContext } from "./auth";
+
+function AuthenticatedRoute({ component: Component, ...props }) {
+  const { state } = useContext(AuthContext);
+
+  if (!state.isAuthenticated) {
+    return <Redirect to="/login"></Redirect>;
+  } else {
+    return <Component {...props} />;
+  }
+}
+
+function NotAuthenticatedRoute({ component: Component, ...props }) {
+  const { state } = useContext(AuthContext);
+
+  if (state.isAuthenticated) {
+    return <Redirect to="/"></Redirect>;
+  } else {
+    return <Component {...props} />;
+  }
+}
 
 ReactDOM.render(
-  <Router>
-    <Auth>
+  <AuthProvider>
+    <Router>
       <Switch>
         <Route path="/register">
-          <Register />
+          <NotAuthenticatedRoute component={Register} />
         </Route>
         <Route path="/login">
-          <Login />
+          <NotAuthenticatedRoute component={Login} />
         </Route>
         <Route path="/">
-          <App />
+          <AuthenticatedRoute component={App} />
         </Route>
       </Switch>
-    </Auth>
-  </Router>,
+    </Router>
+  </AuthProvider>,
   document.getElementById("root"),
 );
 

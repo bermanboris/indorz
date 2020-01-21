@@ -1,11 +1,12 @@
 import React, { useContext } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { AuthContext } from "./auth";
 
 export function Register() {
-  const { dispatch } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
+  const history = useHistory();
 
   return (
     <div>
@@ -14,21 +15,16 @@ export function Register() {
       <Formik
         initialValues={{ email: "", password: "" }}
         onSubmit={async values => {
-          dispatch({
-            type: "LOGIN",
-            payload: { user: "X", token: "Y" },
-          });
-
-          await new Promise(resolve => setTimeout(resolve, 500));
-          alert(JSON.stringify(values, null, 2));
+          login({ user: values.email, token: values.password });
+          return history.push("/");
         }}
         validationSchema={Yup.object().shape({
           email: Yup.string()
             .email()
-            .required("Required"),
+            .required("Field is required"),
           password: Yup.string()
             .min(6)
-            .required("Required"),
+            .required("Field is required"),
         })}
       >
         {props => {

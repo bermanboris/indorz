@@ -1,14 +1,12 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
-import { Login } from "./login";
 
 export const AuthContext = React.createContext();
 
-const initialState = {
-  isAuthenticated: false,
-  user: null,
-  token: null,
-};
+const user = localStorage.getItem("user") || null;
+const token = localStorage.getItem("token") || null;
+const isAuthenticated = user !== null && token !== null;
+
+const initialState = { isAuthenticated, user, token };
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -33,12 +31,15 @@ const reducer = (state, action) => {
   }
 };
 
-export function Auth({ children }) {
+export function AuthProvider({ children }) {
   const [state, dispatch] = React.useReducer(reducer, initialState);
 
+  const login = payload => dispatch({ type: "LOGIN", payload });
+  const logout = () => dispatch({ type: "LOGOUT" });
+
   return (
-    <AuthContext.Provider value={{ state, dispatch }}>
-      {!state.isAuthenticated ? <Login /> : { children }}
+    <AuthContext.Provider value={{ state, login, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 }

@@ -7,6 +7,10 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 app.use(bodyParser.json());
 
+app.post("/", async (req, res) => {
+  res.json({ user: "test", token: "abcd" });
+});
+
 app.get("/", async (req, res) => {
   try {
     console.log("Adding user to database...");

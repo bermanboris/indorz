@@ -1,9 +1,19 @@
 import React, { useContext } from "react";
-import { Redirect } from "react-router-dom";
+import { Button } from "reactstrap";
 import { AuthContext } from "./auth";
 
 function App() {
-  return <div className="App">hello</div>;
+  const { logout } = useContext(AuthContext);
+
+  return (
+    <div>
+      <h1>You are logged in!</h1>
+      <hr />
+      <Button color="danger" onClick={logout}>
+        Logout
+      </Button>
+    </div>
+  );
 }
 
 export default App;

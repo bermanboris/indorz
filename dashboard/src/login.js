@@ -1,26 +1,45 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import axios from "axios";
+
+import { AuthContext } from "./auth";
 
 export function Login() {
+  const { login } = useContext(AuthContext);
+  const history = useHistory();
+
   return (
     <div>
       <h1>Login</h1>
       <hr />
       <Formik
         initialValues={{ email: "", password: "" }}
-        onSubmit={async values => {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          alert(JSON.stringify(values, null, 2));
+        onSubmit={async (values, actions) => {
+          try {
+            console.log(process.env);
+            const { data } = await axios.post(process.env.REACT_APP_AUTH_URL, {
+              email: values.email,
+              password: values.password,
+            });
+
+            login({ user: data.user, token: data.token });
+            history.push("/");
+          } catch (error) {
+            actions.setErrors({
+              email: error.message,
+              password: error.message,
+            });
+          }
         }}
         validationSchema={Yup.object().shape({
           email: Yup.string()
             .email()
-            .required("Required"),
+            .required("Field is required"),
           password: Yup.string()
             .min(6)
-            .required("Required"),
+            .required("Field is required"),
         })}
       >
         {props => {
